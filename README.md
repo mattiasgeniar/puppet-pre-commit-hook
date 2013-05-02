@@ -1,11 +1,17 @@
-=== A Puppet pre-commit hook ===
+A Puppet pre-commit hook
+========================
+
 This is inspired/editted from the pre-commit hook found on the following blog: http://techblog.roethof.net/puppet/a-puppet-git-pre-commit-hook-is-always-easy-to-have/
 All credits should really go to Ronny Roethof, I merely editted it and added some ERB template checking.
 
-=== Installation ===
+Installation
+------------
+
 Go to your git repository, create the file .git/hooks/pre-commit and place the content of this repo in it. Make it execute (chmod +x $file).
 
-=== What does it look like ? ===
+What does it look like ?
+------------------------
+
 Every commit will check the changed files and will report on them as such.
 
 <pre> $ git commit modules/name/ -m "Your commit message"

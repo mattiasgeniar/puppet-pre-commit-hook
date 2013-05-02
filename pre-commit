@@ -6,6 +6,13 @@
 #
 # Install:
 #  /path/to/repo/.git/hooks/pre-comit
+#
+# Original:
+#  blog: http://techblog.roethof.net/puppet/a-puppet-git-pre-commit-hook-is-always-easy-to-have/
+#
+# Authors:
+#  Ronny Roethof
+#  Mattias Geniar <m@ttias.be>
  
 echo "### Checking puppet syntax, for science! ###"
 # for file in `git diff --name-only --cached | grep -E '\.(pp|erb)'`

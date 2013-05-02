@@ -5,6 +5,13 @@ This is inspired/editted from the pre-commit hook found on the following blog: h
 
 All credits should really go to Ronny Roethof, I merely editted it and added some ERB template checking.
 
+What does this do?
+-----------------
+
+For every commit you make into your repository, this script will check the syntax of your code (both Puppet (.pp) and Ruby Templates (.erb)) to make sure they are valid. This does not check the actual workings of your Puppet code, you should look into rspec or cucumber testing for that.
+
+If any invalid syntax is found, it will abort the commit and you won't be able to commit your faulty code that will break production. Yay!
+
 Installation
 ------------
 

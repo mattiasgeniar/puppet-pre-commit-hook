@@ -2,6 +2,7 @@ A Puppet pre-commit hook
 ========================
 
 This is inspired/editted from the pre-commit hook found on the following blog: http://techblog.roethof.net/puppet/a-puppet-git-pre-commit-hook-is-always-easy-to-have/
+
 All credits should really go to Ronny Roethof, I merely editted it and added some ERB template checking.
 
 Installation

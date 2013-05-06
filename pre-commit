@@ -25,6 +25,7 @@ do
             --no-80chars-check \
             --no-autoloader_layout-check \
             --no-nested_classes_or_defines-check \
+            --no-class_parameter_defaults-check \
             --with-filename $file
  
         # Set us up to bail if we receive any syntax errors

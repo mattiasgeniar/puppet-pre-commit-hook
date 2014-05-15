@@ -13,20 +13,24 @@
 # Authors:
 #  Ronny Roethof
 #  Mattias Geniar <m@ttias.be>
-
+ 
 echo "### Checking puppet syntax, for science! ###"
 # for file in `git diff --name-only --cached | grep -E '\.(pp|erb)'`
 for file in `git diff --name-only --cached | grep -E '\.(pp)'`
 do
-    # Only check new/modified files that end in *.pp extension
-    if [[ -f $file && $file == *.pp ]]
+    # Only check new/modified files
+    if [[ -f $file ]]
     then
         puppet-lint \
+            --no-2sp_soft_tabs-check \
+            --no-trailing_whitespace-check \
+            --no-hard_tabs-check \
             --no-80chars-check \
             --no-autoloader_layout-check \
             --no-nested_classes_or_defines-check \
+            --no-single_quote_string_with_variables-check \
             --with-filename $file
-
+ 
         # Set us up to bail if we receive any syntax errors
         if [[ $? -ne 0 ]]
         then
@@ -37,7 +41,7 @@ do
     fi
 done
 echo ""
-
+ 
 echo "### Checking if puppet manifests are valid ###"
 # validating the whole manifest takes too long. uncomment this
 # if you want to test the whole shebang.
@@ -45,9 +49,9 @@ echo "### Checking if puppet manifests are valid ###"
 # for file in `git diff --name-only --cached | grep -E '\.(pp|erb)'`
 for file in `git diff --name-only --cached | grep -E '\.(pp)'`
 do
-    if [[ -f $file && $file == *.pp ]]
+    if [[ -f $file ]]
     then
-        puppet parser validate $file
+        puppet parser validate --color=true $file
         if [[ $? -ne 0 ]]
         then
             echo "ERROR: puppet parser failed at: $file"
@@ -58,8 +62,9 @@ do
     fi
 done
 echo ""
-
+ 
 echo "### Checking if ruby template syntax is valid ###"
+#echo "temp disabled due to erroneous error"
 for file in `git diff --name-only --cached | grep -E '\.(erb)'`
 do
     if [[ -f $file ]]

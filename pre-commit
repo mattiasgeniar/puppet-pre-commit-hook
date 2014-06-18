@@ -5,7 +5,7 @@
 #   gem install puppet-lint puppet
 #
 # Install:
-#  /path/to/repo/.git/hooks/pre-comit
+#  /path/to/repo/.git/hooks/pre-commit
 #
 # Original:
 #  blog: http://techblog.roethof.net/puppet/a-puppet-git-pre-commit-hook-is-always-easy-to-have/

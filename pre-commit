@@ -15,8 +15,7 @@
 #  Mattias Geniar <m@ttias.be>
  
 echo "### Checking puppet syntax, for science! ###"
-# for file in `git diff --name-only --cached | grep -E '\.(pp|erb)'`
-for file in `git diff --name-only --cached | grep -E '\.(pp)'`
+for file in `git diff --name-only --cached | grep -E '\.(pp)$'`
 do
     # Only check new/modified files
     if [[ -f $file ]]
@@ -46,8 +45,7 @@ echo "### Checking if puppet manifests are valid ###"
 # validating the whole manifest takes too long. uncomment this
 # if you want to test the whole shebang.
 # for file in `find . -name "*.pp"`
-# for file in `git diff --name-only --cached | grep -E '\.(pp|erb)'`
-for file in `git diff --name-only --cached | grep -E '\.(pp)'`
+for file in `git diff --name-only --cached | grep -E '\.(pp)$'`
 do
     if [[ -f $file ]]
     then
@@ -65,7 +63,7 @@ echo ""
  
 echo "### Checking if ruby template syntax is valid ###"
 #echo "temp disabled due to erroneous error"
-for file in `git diff --name-only --cached | grep -E '\.(erb)'`
+for file in `git diff --name-only --cached | grep -E '\.(erb)$'`
 do
     if [[ -f $file ]]
     then

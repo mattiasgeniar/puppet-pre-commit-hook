@@ -5,7 +5,7 @@
 #   gem install puppet-lint puppet
 #
 # Install:
-#  /path/to/repo/.git/hooks/pre-comit
+#  /path/to/repo/.git/hooks/pre-commit
 #
 # Original:
 #  blog: http://techblog.roethof.net/puppet/a-puppet-git-pre-commit-hook-is-always-easy-to-have/
@@ -25,6 +25,7 @@ do
             --no-80chars-check \
             --no-autoloader_layout-check \
             --no-nested_classes_or_defines-check \
+            --no-class_inherits_from_params_class-check \
             --with-filename $file
 
         # Set us up to bail if we receive any syntax errors

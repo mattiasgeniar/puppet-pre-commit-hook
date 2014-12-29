@@ -60,14 +60,17 @@ do
 done
 echo ""
 
-echo "### Checking if the catalog compiles"
-puppet apply --noop manifests/site.pp
-if [[ $? -ne 0 ]]
+if [[ -f manifests/site.pp ]]
 then
-    echo "ERROR: puppet catalog compilation failed"
-    syntax_is_bad=1
-else
-    echo "OK: $file looks valid"
+  echo "### Checking if the catalog compiles"
+  puppet apply --noop manifests/site.pp
+  if [[ $? -ne 0 ]]
+  then
+      echo "ERROR: puppet catalog compilation failed"
+      syntax_is_bad=1
+  else
+      echo "OK: $file looks valid"
+  fi
 fi
 
 echo "### Checking if ruby template syntax is valid ###"

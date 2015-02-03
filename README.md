@@ -17,6 +17,20 @@ Installation
 
 Go to your git repository, create the file .git/hooks/pre-commit and place the content of this repo in it. Make it execute (chmod +x $file).
 
+There is also a simple installer provided called `install`. Provide a directory that contains your puppet repositories (default: `..`). Running this will attempt symlink the `.git/hooks/pre-commit` to this hook in all directories at the specified location without regard to whether it is a valid git repository. This may simplify installation when you have multiple puppet repos in the same directory.
+
+```
+$ ./install ~/git/puppet/
+Installing hook to all directories underneath /home/rnelson0/git/puppet/
+Adding hook to directory controlrepo
+Adding hook to directory custom_facts
+Adding hook to directory profile
+Adding hook to directory role
+Setting the executable bit on the hook.
+Installation complete.
+
+```
+
 What does it look like ?
 ------------------------
 

@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# Simple script to configure the 
+HOOK=`pwd`
+if [ "$1" == "" ]
+then
+  echo 'No directory provided, assuming the parent directory holds puppet repos.'
+  LOCATION='..'
+else
+  LOCATION=$1
+fi
+
+echo "Installing hook to all directories underneath ${LOCATION}"
+cd ${LOCATION}
+for DIR in `ls`
+do
+  cd ${LOCATION}
+  echo "Adding hook to directory ${DIR}"
+  cd ${DIR}
+  ln -sf ${HOOK}/pre-commit .git/hooks/pre-commit
+done
+cd ${HOOK}
+
+echo 'Setting the executable bit on the hook.'
+chmod +x pre-commit
+
+echo 'Installation complete.'
+echo ''

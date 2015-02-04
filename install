@@ -5,7 +5,7 @@ HOOK=`pwd`
 if [ "$1" == "" ]
 then
   echo 'No directory provided, assuming the parent directory holds puppet repos.'
-  LOCATION='..'
+  LOCATION=`dirname ${HOOK}`
 else
   LOCATION=$1
 fi

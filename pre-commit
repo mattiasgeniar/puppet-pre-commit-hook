@@ -13,6 +13,11 @@
 # Authors:
 #  Ronny Roethof
 #  Mattias Geniar <m@ttias.be>
+#  Rob Nelson <rnelson0@gmail.com>
+
+function checkyaml() {
+    ruby -e "require 'yaml'; YAML.load_file('$1')"
+} 
 
 echo "### Checking puppet syntax, for science! ###"
 # for file in `git diff --name-only --cached | grep -E '\.(pp|erb)'`
@@ -85,6 +90,23 @@ do
             syntax_is_bad=1
         else
             echo "OK: $file looks like a valid ruby template"
+        fi
+    fi
+done
+echo ""
+
+echo "### Checking if YAML syntax is valid ###"
+for file in `git diff --name-only --cached | grep -E '\.(yaml)'`
+do
+    if [[ -f $file ]]
+    then
+        checkyaml $file
+        if [[ $? -ne 0 ]]
+        then
+            echo "ERROR: YAML syntax validation failed at: $file"
+            syntax_is_bad=1
+        else
+            echo "OK: $file looks like a valid YAML file"
         fi
     fi
 done

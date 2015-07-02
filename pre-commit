@@ -24,28 +24,28 @@ function checkyaml() {
 # No commit should ever happen without a puppet-lint check.
 
  path_to_puppet=$(which puppet)
- if [ ! -x "$path_to_puppet" ] ; then
+ if ! [ -x "$path_to_puppet" ] ; then
     echo "The puppet binary wasn't found. Sorry, I won't allow you to commit without puppet installed."
     echo "Please install puppet and try again."
     exit 1
  fi
 
  path_to_puppet_lint=$(which puppet-lint)
- if [ ! -x "$path_to_puppet_lint" ] ; then
+ if ! [ -x "$path_to_puppet_lint" ] ; then
     echo "The puppet-lint binary wasn't found. Sorry, I won't allow you to commit without puppet-lint installed."
     echo "Please install puppet-lint and try again."
     exit 1
  fi
 
  path_to_erb=$(which erb)
- if [ ! -x "$path_to_erb" ] ; then
+ if ! [ -x "$path_to_erb" ] ; then
     echo "The erb binary wasn't found. Sorry, I won't allow you to commit without erb installed."
     echo "Please install erb (Ruby Templating) and try again."
     exit 1
  fi
 
  path_to_ruby=$(which ruby)
- if [ ! -x "$path_to_ruby" ] ; then
+ if ! [ -x "$path_to_ruby" ] ; then
     echo "The ruby binary wasn't found. Sorry, I won't allow you to commit without ruby installed."
     echo "Please install ruby and try again."
     exit 1

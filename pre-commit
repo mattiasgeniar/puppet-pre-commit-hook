@@ -23,28 +23,28 @@ function checkyaml() {
 # stop the commit. Force the use of these tools before a commit is allowed.
 # No commit should ever happen without a puppet-lint check.
 
- path_to_puppet=$(which puppet)
+ path_to_puppet=$(command -v puppet)
  if ! [ -x "$path_to_puppet" ] ; then
     echo "The puppet binary wasn't found. Sorry, I won't allow you to commit without puppet installed."
     echo "Please install puppet and try again."
     exit 1
  fi
 
- path_to_puppet_lint=$(which puppet-lint)
+ path_to_puppet_lint=$(command -v puppet-lint)
  if ! [ -x "$path_to_puppet_lint" ] ; then
     echo "The puppet-lint binary wasn't found. Sorry, I won't allow you to commit without puppet-lint installed."
     echo "Please install puppet-lint and try again."
     exit 1
  fi
 
- path_to_erb=$(which erb)
+ path_to_erb=$(command -v erb)
  if ! [ -x "$path_to_erb" ] ; then
     echo "The erb binary wasn't found. Sorry, I won't allow you to commit without erb installed."
     echo "Please install erb (Ruby Templating) and try again."
     exit 1
  fi
 
- path_to_ruby=$(which ruby)
+ path_to_ruby=$(command -v ruby)
  if ! [ -x "$path_to_ruby" ] ; then
     echo "The ruby binary wasn't found. Sorry, I won't allow you to commit without ruby installed."
     echo "Please install ruby and try again."

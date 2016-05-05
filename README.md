@@ -5,6 +5,8 @@ This is inspired/editted from the pre-commit hook found on the following blog: h
 
 All credits should really go to Ronny Roethof, I merely editted it and added some ERB template checking.
 
+The code is made available here under the MIT license.
+
 What does this do?
 -----------------
 

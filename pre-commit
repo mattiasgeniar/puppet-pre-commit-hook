@@ -15,41 +15,61 @@
 #  Mattias Geniar <m@ttias.be>
 #  Rob Nelson <rnelson0@gmail.com>
 
-function checkyaml() {
-    ruby -e "require 'yaml'; YAML.load_file('$1')"
+function use_bundle() {
+  path_to_bundle=$(command -v bundle)
+  if [ -x "$path_to_bundle" -a -d ".bundle" ] ; then
+    return 0
+  else
+    return 1
+  fi
 }
 
-# Make sure the necessary tools are installed. If they aren't, just die and
-# stop the commit. Force the use of these tools before a commit is allowed.
-# No commit should ever happen without a puppet-lint check.
+function setup_paths() {
+  # Make sure the necessary tools are installed. If they aren't, just die and
+  # stop the commit. Force the use of these tools before a commit is allowed.
+  # No commit should ever happen without a puppet-lint check.
 
- path_to_puppet=$(command -v puppet)
- if ! [ -x "$path_to_puppet" ] ; then
-    echo "The puppet binary wasn't found. Sorry, I won't allow you to commit without puppet installed."
-    echo "Please install puppet and try again."
-    exit 1
- fi
+  path_to_puppet=$(command -v puppet)
+  if ! [ -x "$path_to_puppet" ] ; then
+     echo "The puppet binary wasn't found. Sorry, I won't allow you to commit without puppet installed."
+     echo "Please install puppet and try again."
+     exit 1
+  fi
 
- path_to_puppet_lint=$(command -v puppet-lint)
- if ! [ -x "$path_to_puppet_lint" ] ; then
-    echo "The puppet-lint binary wasn't found. Sorry, I won't allow you to commit without puppet-lint installed."
-    echo "Please install puppet-lint and try again."
-    exit 1
- fi
+  path_to_puppet_lint=$(command -v puppet-lint)
+  if ! [ -x "$path_to_puppet_lint" ] ; then
+     echo "The puppet-lint binary wasn't found. Sorry, I won't allow you to commit without puppet-lint installed."
+     echo "Please install puppet-lint and try again."
+     exit 1
+  fi
 
- path_to_erb=$(command -v erb)
- if ! [ -x "$path_to_erb" ] ; then
-    echo "The erb binary wasn't found. Sorry, I won't allow you to commit without erb installed."
-    echo "Please install erb (Ruby Templating) and try again."
-    exit 1
- fi
+  path_to_erb=$(command -v erb)
+  if ! [ -x "$path_to_erb" ] ; then
+     echo "The erb binary wasn't found. Sorry, I won't allow you to commit without erb installed."
+     echo "Please install erb (Ruby Templating) and try again."
+     exit 1
+  fi
 
- path_to_ruby=$(command -v ruby)
- if ! [ -x "$path_to_ruby" ] ; then
-    echo "The ruby binary wasn't found. Sorry, I won't allow you to commit without ruby installed."
-    echo "Please install ruby and try again."
-    exit 1
- fi
+  path_to_ruby=$(command -v ruby)
+  if ! [ -x "$path_to_ruby" ] ; then
+     echo "The ruby binary wasn't found. Sorry, I won't allow you to commit without ruby installed."
+     echo "Please install ruby and try again."
+     exit 1
+  fi
+
+  if use_bundle ; then
+    path_to_puppet="${path_to_bundle} exec puppet"
+    path_to_puppet_lint="${path_to_bundle} exec puppet-lint"
+    path_to_erb="${path_to_bundle} exec erb"
+    path_to_ruby="${path_to_bundle} exec ruby"
+  fi
+}
+
+function checkyaml() {
+  $path_to_ruby -e "require 'yaml'; YAML.load_file('$1')"
+}
+
+setup_paths
 
 echo "### Checking puppet syntax, for science! ###"
 # for file in `git diff --name-only --cached | grep -E '\.(pp|erb)'`
@@ -58,7 +78,7 @@ do
     # Only check new/modified files that end in *.pp extension
     if [[ -f $file && $file == *.pp ]]
     then
-        puppet-lint \
+        $path_to_puppet_lint \
             --no-80chars-check \
             --no-autoloader_layout-check \
             --no-nested_classes_or_defines-check \
@@ -85,7 +105,7 @@ for file in `git diff --name-only --cached | grep -E '\.(pp)'`
 do
     if [[ -f $file && $file == *.pp ]]
     then
-        puppet parser validate $file
+        $path_to_puppet parser validate $file
         if [[ $? -ne 0 ]]
         then
             echo "ERROR: puppet parser failed at: $file"
@@ -100,7 +120,7 @@ echo ""
 if [[ -f manifests/site.pp ]]
 then
   echo "### Checking if the catalog compiles"
-  puppet apply --noop manifests/site.pp
+  $path_to_puppet apply --noop manifests/site.pp
   if [[ $? -ne 0 ]]
   then
       echo "ERROR: puppet catalog compilation failed"
@@ -115,7 +135,7 @@ for file in `git diff --name-only --cached | grep -E '\.(erb)'`
 do
     if [[ -f $file ]]
     then
-        erb -P -x -T '-' $file | ruby -c
+        $path_to_erb -P -x -T '-' $file | ruby -c
         if [[ $? -ne 0 ]]
         then
             echo "ERROR: ruby template parser failed at: $file"

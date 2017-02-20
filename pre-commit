@@ -117,7 +117,7 @@ do
 done
 echo ""
 
-if [[ -f manifests/site.pp ]]
+if [[ ! -z `git diff --name-only --cached | grep -E manifests/site.pp` ]]
 then
   echo "### Checking if the catalog compiles"
   $path_to_puppet apply --noop manifests/site.pp

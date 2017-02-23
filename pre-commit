@@ -17,8 +17,13 @@
 
 function use_bundle() {
   path_to_bundle=$(command -v bundle)
-  if [ -x "$path_to_bundle" -a -d ".bundle" ] ; then
-    return 0
+  if [ -x "$path_to_bundle" ] && [[ -f Gemfile ]] ; then
+    if "${path_to_bundle}" check 2>&1 >/dev/null; then
+      return 0
+    else
+      echo "A bundler setup is present but incomplete. Run 'bundle install' or remove the Gemfile."
+      exit 1
+    fi
   else
     return 1
   fi

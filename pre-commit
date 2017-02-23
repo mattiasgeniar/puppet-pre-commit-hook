@@ -17,7 +17,7 @@
 
 function use_bundle() {
   path_to_bundle=$(command -v bundle)
-  if [ -x "$path_to_bundle" ] && [[ -f Gemfile ]] ; then
+  if [[ -x "$path_to_bundle" ]] && [[ -f Gemfile ]] ; then
     if "${path_to_bundle}" check 2>&1 >/dev/null; then
       return 0
     else

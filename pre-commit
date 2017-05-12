@@ -81,12 +81,17 @@ echo "### Checking puppet syntax, for science! ###"
 for file in $(git diff --name-only --cached | grep -E '\.(pp)'); do
   # Only check new/modified files that end in *.pp extension
   if [[ -f $file && $file == *.pp ]]; then
-    $path_to_puppet_lint \
-      --no-80chars-check \
-      --no-autoloader_layout-check \
-      --no-nested_classes_or_defines-check \
-      --no-class_inherits_from_params_class-check \
-      --with-filename $file
+    # allow user-defined over-ride of linting rules with .puppet-lint.rc
+    if [[ -f "$(git rev-parse --show-toplevel)/.puppet-lint.rc" ]]; then
+      $path_to_puppet_lint --config "$(git rev-parse --show-toplevel)/.puppet-lint.rc" "$file"
+    else
+      $path_to_puppet_lint \
+        --no-80chars-check \
+        --no-autoloader_layout-check \
+        --no-nested_classes_or_defines-check \
+        --no-class_inherits_from_params_class-check \
+        --with-filename "$file"
+    fi
 
     # Set us up to bail if we receive any syntax errors
     if [[ $? -ne 0 ]]; then

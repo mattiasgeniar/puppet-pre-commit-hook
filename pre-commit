@@ -76,59 +76,68 @@ function checkyaml() {
 
 setup_paths
 
-echo "### Checking puppet syntax, for science! ###"
-# for file in $(git diff --name-only --cached | grep -E '\.(pp|erb)')
-for file in $(git diff --name-only --cached | grep -E '\.(pp)'); do
-  # Only check new/modified files that end in *.pp extension
-  if [[ -f $file && $file == *.pp ]]; then
-    $path_to_puppet_lint \
-      --no-80chars-check \
-      --no-autoloader_layout-check \
-      --no-nested_classes_or_defines-check \
-      --no-class_inherits_from_params_class-check \
-      --with-filename $file
+if [[ $(git diff --name-only --cached | grep -E '\.(pp)') ]]; then
+  echo "### Checking puppet syntax, for science! ###"
+  # for file in $(git diff --name-only --cached | grep -E '\.(pp|erb)')
+  for file in $(git diff --name-only --cached | grep -E '\.(pp)'); do
+    # Only check new/modified files that end in *.pp extension
+    if [[ -f $file && $file == *.pp ]]; then
+      # allow user-defined over-ride of linting rules with .puppet-lint.rc
+      if [[ -f "$(git rev-parse --show-toplevel)/.puppet-lint.rc" ]]; then
+        $path_to_puppet_lint --config "$(git rev-parse --show-toplevel)/.puppet-lint.rc" "$file"
+      else
+        $path_to_puppet_lint \
+          --no-140chars-check \
+          --no-autoloader_layout-check \
+          --no-nested_classes_or_defines-check \
+          --no-class_inherits_from_params_class-check \
+          --with-filename "$file"
+      fi
 
-    # Set us up to bail if we receive any syntax errors
-    if [[ $? -ne 0 ]]; then
-      syntax_is_bad=1
-    else
-      echo "$file looks good"
+      # Set us up to bail if we receive any syntax errors
+      if [[ $? -ne 0 ]]; then
+        syntax_is_bad=1
+      else
+        echo "$file looks good"
+      fi
     fi
-  fi
-done
-echo ""
+  done
+  echo ""
 
-echo "### Checking if puppet manifests are valid ###"
-# validating the whole manifest takes too long. uncomment this
-# if you want to test the whole shebang.
-# for file in $(find . -name "*.pp")
-# for file in $(git diff --name-only --cached | grep -E '\.(pp|erb)')
-for file in $(git diff --name-only --cached | grep -E '\.(pp)'); do
-  if [[ -f $file && $file == *.pp ]]; then
-    $path_to_puppet parser validate $file
-    if [[ $? -ne 0 ]]; then
-      echo "ERROR: puppet parser failed at: $file"
-      syntax_is_bad=1
-    else
-      echo "OK: $file looks valid"
+  echo "### Checking if puppet manifests are valid ###"
+  # validating the whole manifest takes too long. uncomment this
+  # if you want to test the whole shebang.
+  # for file in $(find . -name "*.pp")
+  # for file in $(git diff --name-only --cached | grep -E '\.(pp|erb)')
+  for file in $(git diff --name-only --cached | grep -E '\.(pp)'); do
+    if [[ -f $file && $file == *.pp ]]; then
+      $path_to_puppet parser validate $file
+      if [[ $? -ne 0 ]]; then
+        echo "ERROR: puppet parser failed at: $file"
+        syntax_is_bad=1
+      else
+        echo "OK: $file looks valid"
+      fi
     fi
-  fi
-done
-echo ""
+  done
+  echo ""
+fi
 
-echo "### Checking if puppet EPP templates are valid ###"
-for file in $(git diff --name-only --cached | grep -E '\.(epp)'); do
-  if [[ -f $file && $file == *.epp ]]; then
-    $path_to_puppet epp validate $file
-    if [[ $? -ne 0 ]]; then
-      echo "ERROR: puppet EPP parser failed at: $file"
-      syntax_is_bad=1
-    else
-      echo "OK: $file looks valid"
+if [[ $(git diff --name-only --cached | grep -E '\.(epp)') ]]; then
+  echo "### Checking if puppet EPP templates are valid ###"
+  for file in $(git diff --name-only --cached | grep -E '\.(epp)'); do
+    if [[ -f $file && $file == *.epp ]]; then
+      $path_to_puppet epp validate $file
+      if [[ $? -ne 0 ]]; then
+        echo "ERROR: puppet EPP parser failed at: $file"
+        syntax_is_bad=1
+      else
+        echo "OK: $file looks valid"
+      fi
     fi
-  fi
-done
-echo ""
+  done
+  echo ""
+fi
 
 if [[ ! -z $(git diff --name-only --cached | grep -E manifests/site.pp) ]]; then
   echo "### Checking if the catalog compiles"
@@ -141,47 +150,53 @@ if [[ ! -z $(git diff --name-only --cached | grep -E manifests/site.pp) ]]; then
   fi
 fi
 
-echo "### Checking if ruby template syntax is valid ###"
-for file in $(git diff --name-only --cached | grep -E '\.(erb)'); do
-  if [[ -f $file ]]; then
-    $path_to_erb -P -x -T '-' $file | ruby -c
-    if [[ $? -ne 0 ]]; then
-      echo "ERROR: ruby template parser failed at: $file"
-      syntax_is_bad=1
-    else
-      echo "OK: $file looks like a valid ruby template"
+if [[ $(git diff --name-only --cached | grep -E '\.(erb)') ]]; then
+  echo "### Checking if ruby template syntax is valid ###"
+  for file in $(git diff --name-only --cached | grep -E '\.(erb)'); do
+    if [[ -f $file ]]; then
+      $path_to_erb -P -x -T '-' $file | ruby -c
+      if [[ $? -ne 0 ]]; then
+        echo "ERROR: ruby template parser failed at: $file"
+        syntax_is_bad=1
+      else
+        echo "OK: $file looks like a valid ruby template"
+      fi
     fi
-  fi
-done
-echo ""
+  done
+  echo ""
+fi
 
-echo "### Checking if ruby syntax is valid ###"
-for file in $(git diff --name-only --cached | grep -E '\.(rb)'); do
-  if [[ -f $file ]]; then
-    $path_to_ruby -c $file
-    if [[ $? -ne 0 ]]; then
-      echo "ERROR: ruby parser failed at: $file"
-      syntax_is_bad=1
-    else
-      echo "OK: $file looks like a valid ruby file"
+if [[ $(git diff --name-only --cached | grep -E '\.(rb)') ]]; then
+  echo "### Checking if ruby syntax is valid ###"
+  for file in $(git diff --name-only --cached | grep -E '\.(rb)'); do
+    if [[ -f $file ]]; then
+      $path_to_ruby -c $file
+      if [[ $? -ne 0 ]]; then
+        echo "ERROR: ruby parser failed at: $file"
+        syntax_is_bad=1
+      else
+        echo "OK: $file looks like a valid ruby file"
+      fi
     fi
-  fi
-done
-echo ""
+  done
+  echo ""
+fi
 
-echo "### Checking if YAML syntax is valid ###"
-for file in $(git diff --name-only --cached | grep -E '\.(yaml)'); do
-  if [[ -f $file ]]; then
-    checkyaml $file
-    if [[ $? -ne 0 ]]; then
-      echo "ERROR: YAML syntax validation failed at: $file"
-      syntax_is_bad=1
-    else
-      echo "OK: $file looks like a valid YAML file"
+if [[ $(git diff --name-only --cached | grep -E '\.(yaml)') ]]; then
+  echo "### Checking if YAML syntax is valid ###"
+  for file in $(git diff --name-only --cached | grep -E '\.(yaml)'); do
+    if [[ -f $file ]]; then
+      checkyaml $file
+      if [[ $? -ne 0 ]]; then
+        echo "ERROR: YAML syntax validation failed at: $file"
+        syntax_is_bad=1
+      else
+        echo "OK: $file looks like a valid YAML file"
+      fi
     fi
-  fi
-done
-echo ""
+  done
+  echo ""
+fi
 
 if [[ $syntax_is_bad -eq 1 ]]; then
   echo "FATAL: Syntax is bad. See above errors"

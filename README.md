@@ -39,19 +39,19 @@ What does it look like ?
 Every commit will check the changed files and will report on them as such.
 
 <pre> $ git commit modules/name/ -m "Your commit message"
-### Checking puppet syntax, for science! ###
-modules/name/manifests/init.pp looks good
-modules/name/tests/init.pp looks good
 
-### Checking if puppet manifests are valid ###
-OK: modules/name/manifests/init.pp looks valid
-OK: modules/name/tests/init.pp looks valid
+*** Checking puppet code for style ***
+PASSED: modules/name/manifests/init.pp
+PASSED: modules/name/tests/init.pp
 
-### Checking if ruby template syntax is valid ###
-Syntax OK
-OK: modules/name/templates/template-file.erb looks like a valid ruby template
+*** Checking puppet manifest syntax ***
+PASSED: modules/name/manifests/init.pp
+PASSED: modules/name/tests/init.pp
 
-Everything looks good.
+*** Checking ruby template(erb) syntax ***
+PASSED: modules/name/templates/template-file.erb
+
+No Errors Found, Commit ACCEPTED
 [develop adb6889] Your commit message
  3 files changed, 120 insertions(+)
   create mode 100644 modules/name/manifests/init.pp

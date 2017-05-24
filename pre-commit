@@ -14,6 +14,15 @@
 #  Ronny Roethof
 #  Mattias Geniar <m@ttias.be>
 #  Rob Nelson <rnelson0@gmail.com>
+#  Jake Rogers <code@supportoss.org>
+
+# set colors
+c_fail='1'  # red
+c_pass='2'  # green
+
+function header() { tput bold; echo -e "\n${1}"; tput sgr0; }
+function fail() { tput setaf $c_fail; echo -ne "${1}"; tput sgr0; }
+function pass() { tput setaf $c_pass; echo -ne "${1}"; tput sgr0; }
 
 function use_bundle() {
   path_to_bundle=$(command -v bundle)
@@ -21,7 +30,7 @@ function use_bundle() {
     if "${path_to_bundle}" check 2>&1 >/dev/null; then
       return 0
     else
-      echo "A bundler setup is present but incomplete. Run 'bundle install' or remove the Gemfile."
+      fail "A bundler setup is present but incomplete. Run 'bundle install' or remove the Gemfile.\n"
       exit 1
     fi
   else
@@ -37,28 +46,28 @@ function setup_paths() {
   path_to_puppet=$(command -v puppet)
   if ! [[ -x "$path_to_puppet" ]]; then
     echo "The puppet binary wasn't found. Sorry, I won't allow you to commit without puppet installed."
-    echo "Please install puppet and try again."
+    fail "Please install puppet and try again.\n"
     exit 1
   fi
 
   path_to_puppet_lint=$(command -v puppet-lint)
   if ! [[ -x "$path_to_puppet_lint" ]]; then
     echo "The puppet-lint binary wasn't found. Sorry, I won't allow you to commit without puppet-lint installed."
-    echo "Please install puppet-lint and try again."
+    fail "Please install puppet-lint and try again.\n"
     exit 1
   fi
 
   path_to_erb=$(command -v erb)
   if ! [[ -x "$path_to_erb" ]]; then
     echo "The erb binary wasn't found. Sorry, I won't allow you to commit without erb installed."
-    echo "Please install erb (Ruby Templating) and try again."
+    fail "Please install erb (Ruby Templating) and try again.\n"
     exit 1
   fi
 
   path_to_ruby=$(command -v ruby)
   if ! [[ -x "$path_to_ruby" ]]; then
     echo "The ruby binary wasn't found. Sorry, I won't allow you to commit without ruby installed."
-    echo "Please install ruby and try again."
+    fail "Please install ruby and try again.\n"
     exit 1
   fi
 
@@ -77,7 +86,7 @@ function checkyaml() {
 setup_paths
 
 if [[ $(git diff --name-only --cached | grep -E '\.(pp)') ]]; then
-  echo "### Checking puppet syntax, for science! ###"
+  header "*** Checking puppet code for style ***"
   # for file in $(git diff --name-only --cached | grep -E '\.(pp|erb)')
   for file in $(git diff --name-only --cached | grep -E '\.(pp)'); do
     # Only check new/modified files that end in *.pp extension
@@ -96,15 +105,15 @@ if [[ $(git diff --name-only --cached | grep -E '\.(pp)') ]]; then
 
       # Set us up to bail if we receive any syntax errors
       if [[ $? -ne 0 ]]; then
+        fail "FAILED: "; echo "$file"
         syntax_is_bad=1
       else
-        echo "$file looks good"
+        pass "PASSED: "; echo "$file"
       fi
     fi
   done
-  echo ""
 
-  echo "### Checking if puppet manifests are valid ###"
+  header "*** Checking puppet manifest syntax ***"
   # validating the whole manifest takes too long. uncomment this
   # if you want to test the whole shebang.
   # for file in $(find . -name "*.pp")
@@ -113,95 +122,89 @@ if [[ $(git diff --name-only --cached | grep -E '\.(pp)') ]]; then
     if [[ -f $file && $file == *.pp ]]; then
       $path_to_puppet parser validate $file
       if [[ $? -ne 0 ]]; then
-        echo "ERROR: puppet parser failed at: $file"
+        fail "FAILED: "; echo "$file"
         syntax_is_bad=1
       else
-        echo "OK: $file looks valid"
+        pass "PASSED: "; echo "$file"
       fi
     fi
   done
-  echo ""
+fi
+
+if [[ ! -z $(git diff --name-only --cached | grep -E manifests/site.pp) ]]; then
+  echo "*** Checking if the catalog compiles ***"
+  $path_to_puppet apply --noop manifests/site.pp
+  if [[ $? -ne 0 ]]; then
+    fail "FAILED: "; echo "catalog compilation"
+    syntax_is_bad=1
+  else
+    pass "PASSED: "; echo "catalog compilation"
+  fi
 fi
 
 if [[ $(git diff --name-only --cached | grep -E '\.(epp)') ]]; then
-  echo "### Checking if puppet EPP templates are valid ###"
+  header "*** Checking puppet template(epp) syntax ***"
   for file in $(git diff --name-only --cached | grep -E '\.(epp)'); do
     if [[ -f $file && $file == *.epp ]]; then
       $path_to_puppet epp validate $file
       if [[ $? -ne 0 ]]; then
-        echo "ERROR: puppet EPP parser failed at: $file"
+        fail "FAILED: "; echo "$file"
         syntax_is_bad=1
       else
-        echo "OK: $file looks valid"
+        pass "PASSED: "; echo "$file"
       fi
     fi
   done
-  echo ""
-fi
-
-if [[ ! -z $(git diff --name-only --cached | grep -E manifests/site.pp) ]]; then
-  echo "### Checking if the catalog compiles"
-  $path_to_puppet apply --noop manifests/site.pp
-  if [[ $? -ne 0 ]]; then
-    echo "ERROR: puppet catalog compilation failed"
-    syntax_is_bad=1
-  else
-    echo "OK: $file looks valid"
-  fi
 fi
 
 if [[ $(git diff --name-only --cached | grep -E '\.(erb)') ]]; then
-  echo "### Checking if ruby template syntax is valid ###"
+  header "*** Checking ruby template(erb) syntax ***"
   for file in $(git diff --name-only --cached | grep -E '\.(erb)'); do
     if [[ -f $file ]]; then
-      $path_to_erb -P -x -T '-' $file | ruby -c
-      if [[ $? -ne 0 ]]; then
-        echo "ERROR: ruby template parser failed at: $file"
+      $path_to_erb -P -x -T '-' $file | ruby -c | grep -v '^Syntax OK'
+      if [[ "${PIPESTATUS[0]}" -ne 0 ]]; then
+        fail "FAILED: "; echo "$file"
         syntax_is_bad=1
       else
-        echo "OK: $file looks like a valid ruby template"
+        pass "PASSED: "; echo "$file"
       fi
     fi
   done
-  echo ""
 fi
 
 if [[ $(git diff --name-only --cached | grep -E '\.(rb)') ]]; then
-  echo "### Checking if ruby syntax is valid ###"
+  header "*** Checking ruby syntax ***"
   for file in $(git diff --name-only --cached | grep -E '\.(rb)'); do
     if [[ -f $file ]]; then
-      $path_to_ruby -c $file
-      if [[ $? -ne 0 ]]; then
-        echo "ERROR: ruby parser failed at: $file"
+      $path_to_ruby -c $file | grep -v '^Syntax OK'
+      if [[ "${PIPESTATUS[0]}" -ne 0 ]]; then
+        fail "FAILED: "; echo "$file"
         syntax_is_bad=1
       else
-        echo "OK: $file looks like a valid ruby file"
+        pass "PASSED: "; echo "$file"
       fi
     fi
   done
-  echo ""
 fi
 
 if [[ $(git diff --name-only --cached | grep -E '\.(yaml)') ]]; then
-  echo "### Checking if YAML syntax is valid ###"
+  header "*** Checking YAML syntax ***"
   for file in $(git diff --name-only --cached | grep -E '\.(yaml)'); do
     if [[ -f $file ]]; then
       checkyaml $file
       if [[ $? -ne 0 ]]; then
-        echo "ERROR: YAML syntax validation failed at: $file"
+        fail "FAILED: "; echo "$file"
         syntax_is_bad=1
       else
-        echo "OK: $file looks like a valid YAML file"
+        pass "PASSED: "; echo "$file"
       fi
     fi
   done
-  echo ""
 fi
 
 if [[ $syntax_is_bad -eq 1 ]]; then
-  echo "FATAL: Syntax is bad. See above errors"
-  echo "Bailing"
+  fail "\nErrors Found, Commit REJECTED\n"
   exit 1
 else
-  echo "Everything looks good."
+  pass "\nNo Errors Found, Commit ACCEPTED\n"
 fi

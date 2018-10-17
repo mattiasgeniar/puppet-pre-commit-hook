@@ -33,6 +33,14 @@ Installation complete.
 
 ```
 
+PDK vs Bundler
+--------------
+
+The pre-commit hook attempts to auto-detect the availability of the PDK or a bundler setup, with a preference for the PDK. If you have the PDK installed but prefer to use bundler, you may override the default behavior by:
+* Creating `~/.prefer_bundler` (global override)
+* Creating `./.prefer_bundler` (override only in the current directory)
+* Set `PREFER_BUNDLER` to any non-null value (override only for the current command/shell instance)
+
 What does it look like ?
 ------------------------
 

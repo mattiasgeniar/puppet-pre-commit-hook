@@ -38,6 +38,26 @@ function use_bundle() {
   fi
 }
 
+function use_pdk() {
+  path_to_pdk=$(command -v pdk)
+  if [[ -x "$path_to_pdk" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function prefer_pdk() {
+  # By default, prefer the PDK over a bundler setup
+  # If a user sets a file or envvar, prefer the bundler setup
+  prefer_pdk=0
+
+  if [[ -e ~/.prefer_bundler ]] || [[ -e ./.prefer_bundler ]] || [[ -n "${PREFER_BUNDLER}" ]]; then
+    prefer_pdk=1
+  fi
+  return $prefer_pdk
+}
+
 function setup_paths() {
   # Make sure the necessary tools are installed. If they aren't, just die and
   # stop the commit. Force the use of these tools before a commit is allowed.
@@ -71,7 +91,12 @@ function setup_paths() {
     exit 1
   fi
 
-  if use_bundle; then
+  if prefer_pdk && use_pdk; then
+    path_to_puppet="${path_to_pdk} bundle exec puppet"
+    path_to_puppet_lint="${path_to_pdk} bundle exec puppet-lint"
+    path_to_erb="${path_to_pdk} bundle exec erb"
+    path_to_ruby="${path_to_pdk} bundle exec ruby"
+  elif use_bundle; then
     path_to_puppet="${path_to_bundle} exec puppet"
     path_to_puppet_lint="${path_to_bundle} exec puppet-lint"
     path_to_erb="${path_to_bundle} exec erb"
@@ -161,7 +186,7 @@ if [[ $(git diff --name-only --cached | grep -E '\.(erb)') ]]; then
   header "*** Checking ruby template(erb) syntax ***"
   for file in $(git diff --name-only --cached | grep -E '\.(erb)'); do
     if [[ -f $file ]]; then
-      $path_to_erb -P -x -T '-' $file | ruby -c | grep -v '^Syntax OK'
+      $path_to_erb -P -x -T '-' $file | $path_to_ruby -c | grep -v '^Syntax OK'
       if [[ "${PIPESTATUS[0]}" -ne 0 ]]; then
         fail "FAILED: "; echo "$file"
         syntax_is_bad=1

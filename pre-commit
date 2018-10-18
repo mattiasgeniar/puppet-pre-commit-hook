@@ -124,12 +124,7 @@ if [[ $(git diff --name-only --cached | grep -E '\.(pp)') ]]; then
       if [[ -f "$(git rev-parse --show-toplevel)/.puppet-lint.rc" ]]; then
         $path_to_puppet_lint --config "$(git rev-parse --show-toplevel)/.puppet-lint.rc" "$file"
       else
-        $path_to_puppet_lint \
-          --no-140chars-check \
-          --no-autoloader_layout-check \
-          --no-nested_classes_or_defines-check \
-          --no-class_inherits_from_params_class-check \
-          --with-filename "$file"
+        $path_to_puppet_lint --with-filename "$file"
       fi
 
       # Set us up to bail if we receive any syntax errors

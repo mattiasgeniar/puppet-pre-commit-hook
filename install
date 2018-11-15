@@ -2,7 +2,7 @@
 #
 # Simple script to configure the 
 HOOK=`pwd`
-if [ "$1" == "" ]
+if [ "$1" = "" ]
 then
   echo 'No directory provided, assuming the parent directory holds puppet repos.'
   LOCATION=`dirname ${HOOK}`

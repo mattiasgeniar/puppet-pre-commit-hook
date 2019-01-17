@@ -211,9 +211,9 @@ if [[ $(git diff --name-only --cached | grep -E '\.(rb)') ]]; then
   done
 fi
 
-if [[ $(git diff --name-only --cached | grep -E '\.(yaml)') ]]; then
+if [[ $(git diff --name-only --cached | grep -E '\.(yaml$|yml$)') ]]; then
   header "*** Checking YAML syntax ***"
-  for file in $(git diff --name-only --cached | grep -E '\.(yaml)'); do
+  for file in $(git diff --name-only --cached | grep -E '\.(yaml$|yml$)'); do
     if [[ -f $file ]]; then
       checkyaml $file
       if [[ $? -ne 0 ]]; then

@@ -181,9 +181,9 @@ if [[ $(git diff --name-only --cached | grep -E '\.(epp)') ]]; then
   done
 fi
 
-if [[ $(git diff --name-only --cached | grep -E '\.(erb)') ]]; then
+if [[ $(git diff --name-only --cached | grep -E '\.(erb$)') ]]; then
   header "*** Checking ruby template(erb) syntax ***"
-  for file in $(git diff --name-only --cached | grep -E '\.(erb)'); do
+  for file in $(git diff --name-only --cached | grep -E '\.(erb$)'); do
     if [[ -f $file ]]; then
       $path_to_erb -P -x -T '-' $file | $path_to_ruby -c | grep -v '^Syntax OK'
       if [[ "${PIPESTATUS[1]}" -ne 0 ]]; then
@@ -196,9 +196,9 @@ if [[ $(git diff --name-only --cached | grep -E '\.(erb)') ]]; then
   done
 fi
 
-if [[ $(git diff --name-only --cached | grep -E '\.(rb)') ]]; then
+if [[ $(git diff --name-only --cached | grep -E '\.(rb$)') ]]; then
   header "*** Checking ruby syntax ***"
-  for file in $(git diff --name-only --cached | grep -E '\.(rb)'); do
+  for file in $(git diff --name-only --cached | grep -E '\.(rb$)'); do
     if [[ -f $file ]]; then
       $path_to_ruby -c $file | grep -v '^Syntax OK'
       if [[ "${PIPESTATUS[0]}" -ne 0 ]]; then

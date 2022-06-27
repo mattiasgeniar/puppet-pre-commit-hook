@@ -20,9 +20,16 @@
 c_fail='1'  # red
 c_pass='2'  # green
 
-function header() { tput bold; echo -e "\n${1}"; tput sgr0; }
-function fail() { tput setaf $c_fail; echo -ne "${1}"; tput sgr0; }
-function pass() { tput setaf $c_pass; echo -ne "${1}"; tput sgr0; }
+if [ "${TERM}" -ne "" ]; then
+    function header() { tput bold; echo -e "\n${1}"; tput sgr0; }
+    function fail() { tput setaf $c_fail; echo -ne "${1}"; tput sgr0; }
+    function pass() { tput setaf $c_pass; echo -ne "${1}"; tput sgr0; }
+else
+    function header() { echo -e "\n${1}"; }
+    function fail() { echo -ne "${1}"; }
+    function pass() { echo -ne "${1}"; }
+fi
+
 
 function use_bundle() {
   path_to_bundle=$(command -v bundle)

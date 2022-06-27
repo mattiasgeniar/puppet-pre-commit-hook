@@ -39,7 +39,7 @@ function use_bundle() {
 }
 
 function use_pdk() {
-  if [[ $(/usr/bin/uname -s) = 'Linux' ]] || [[ $(/usr/bin/uname -s) = 'Darwin' ]]; then
+  if [[ $(/usr/bin/env uname -s) = 'Linux' ]] || [[ $(/usr/bin/env uname -s) = 'Darwin' ]]; then
     path_to_pdk=$(command -v pdk)
   elif which powershell.exe 2>&1 >/dev/null; then
     path_to_pdk='powershell.exe -command pdk'

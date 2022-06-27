@@ -21,7 +21,7 @@
 c_fail='1'  # red
 c_pass='2'  # green
 
-if [ -n "${TERM}" ]; then
+if [ -n "${TERM}" ] && [ "${TERM}" != "dumb" ]; then
     function header() { tput bold; echo -e "\n${1}"; tput sgr0; }
     function fail() { tput setaf $c_fail; echo -ne "${1}"; tput sgr0; }
     function pass() { tput setaf $c_pass; echo -ne "${1}"; tput sgr0; }

@@ -15,14 +15,22 @@
 #  Mattias Geniar <m@ttias.be>
 #  Rob Nelson <rnelson0@gmail.com>
 #  Jake Rogers <code@supportoss.org>
+#  Geoff Davis <geoff@geoffdavis.com>
 
 # set colors
 c_fail='1'  # red
 c_pass='2'  # green
 
-function header() { tput bold; echo -e "\n${1}"; tput sgr0; }
-function fail() { tput setaf $c_fail; echo -ne "${1}"; tput sgr0; }
-function pass() { tput setaf $c_pass; echo -ne "${1}"; tput sgr0; }
+if [ -n "${TERM}" ] && [ "${TERM}" != "dumb" ]; then
+    function header() { tput bold; echo -e "\n${1}"; tput sgr0; }
+    function fail() { tput setaf $c_fail; echo -ne "${1}"; tput sgr0; }
+    function pass() { tput setaf $c_pass; echo -ne "${1}"; tput sgr0; }
+else
+    function header() { echo -e "\n${1}"; }
+    function fail() { echo -ne "${1}"; }
+    function pass() { echo -ne "${1}"; }
+fi
+
 
 function use_bundle() {
   path_to_bundle=$(command -v bundle)
@@ -39,7 +47,7 @@ function use_bundle() {
 }
 
 function use_pdk() {
-  if [[ $(/usr/bin/uname -s) = 'Linux' ]] || [[ $(/usr/bin/uname -s) = 'Darwin' ]]; then
+  if [[ $(/usr/bin/env uname -s) = 'Linux' ]] || [[ $(/usr/bin/env uname -s) = 'Darwin' ]]; then
     path_to_pdk=$(command -v pdk)
   elif which powershell.exe 2>&1 >/dev/null; then
     path_to_pdk='powershell.exe -command pdk'
